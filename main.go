@@ -11,11 +11,6 @@ import (
 	"github.com/fatih/color"
 )
 
-type Color struct {
-	Re    *regexp.Regexp
-	Print func(format string, a ...interface{})
-}
-
 func main() {
 	flag.CommandLine.Usage = func() {
 		header := `%s [OPTIONS PATTERN] INPUT
@@ -32,13 +27,26 @@ Options:
 		flag.PrintDefaults()
 	}
 
-	var blue, cyan, green, magenta, red, yellow string
-	flag.StringVar(&blue, "b", "", "blue - color the matching line with blue")
-	flag.StringVar(&cyan, "c", "", "cyan - color the matching line with cyan")
-	flag.StringVar(&green, "g", "", "green - color the matching line with green")
-	flag.StringVar(&magenta, "m", "", "magenta - color the matching line with magenta")
-	flag.StringVar(&red, "r", "", "red - color the matching line with red")
-	flag.StringVar(&yellow, "y", "", "yellow - color the matching line with yellow")
+	type Flag struct {
+		Pattern string
+		Print   func(format string, a ...interface{})
+	}
+
+	flags := map[string]*Flag{
+		"blue":    &Flag{Print: color.Blue},
+		"cyan":    &Flag{Print: color.Cyan},
+		"green":   &Flag{Print: color.Green},
+		"magenta": &Flag{Print: color.Magenta},
+		"red":     &Flag{Print: color.Red},
+		"yellow":  &Flag{Print: color.Yellow},
+	}
+
+	flag.StringVar(&flags["blue"].Pattern, "b", "", "blue - color the matching line with blue")
+	flag.StringVar(&flags["cyan"].Pattern, "c", "", "cyan - color the matching line with cyan")
+	flag.StringVar(&flags["green"].Pattern, "g", "", "green - color the matching line with green")
+	flag.StringVar(&flags["magenta"].Pattern, "m", "", "magenta - color the matching line with magenta")
+	flag.StringVar(&flags["red"].Pattern, "r", "", "red - color the matching line with red")
+	flag.StringVar(&flags["yellow"].Pattern, "y", "", "yellow - color the matching line with yellow")
 	flag.Parse()
 
 	if len(os.Args) == 1 {
@@ -47,54 +55,24 @@ Options:
 		os.Exit(1)
 	}
 
+	type Color struct {
+		Re    *regexp.Regexp
+		Print func(format string, a ...interface{})
+	}
+
 	var colors []Color
-	if blue != "" {
-		blueRE, err := regexp.Compile(blue)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "error: %s\n\n", err)
-		} else {
-			colors = append(colors, Color{Re: blueRE, Print: color.Blue})
+	for _, v := range flags {
+		if v.Pattern == "" {
+			continue
 		}
-	}
-	if cyan != "" {
-		cyanRE, err := regexp.Compile(cyan)
+		re, err := regexp.Compile(v.Pattern)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "error: %s\n\n", err)
-		} else {
-			colors = append(colors, Color{Re: cyanRE, Print: color.Cyan})
+			fmt.Fprintf(os.Stderr, "cannot create color from given pattern: %s\n\n", v.Pattern)
+			flag.CommandLine.Usage()
+			os.Exit(1)
 		}
-	}
-	if green != "" {
-		greenRE, err := regexp.Compile(green)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "error: %s\n\n", err)
-		} else {
-			colors = append(colors, Color{Re: greenRE, Print: color.Green})
-		}
-	}
-	if magenta != "" {
-		magentaRE, err := regexp.Compile(magenta)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "error: %s\n\n", err)
-		} else {
-			colors = append(colors, Color{Re: magentaRE, Print: color.Magenta})
-		}
-	}
-	if red != "" {
-		redRE, err := regexp.Compile(red)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "error: %s\n\n", err)
-		} else {
-			colors = append(colors, Color{Re: redRE, Print: color.Red})
-		}
-	}
-	if yellow != "" {
-		yellowRE, err := regexp.Compile(yellow)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "error: %s\n\n", err)
-		} else {
-			colors = append(colors, Color{Re: yellowRE, Print: color.Yellow})
-		}
+		color := Color{Re: re, Print: v.Print}
+		colors = append(colors, color)
 	}
 
 	filecontent := `white line
