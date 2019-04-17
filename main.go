@@ -1,13 +1,20 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
-	"log"
 	"os"
+	"regexp"
+	"strings"
 
 	"github.com/fatih/color"
 )
+
+type Color struct {
+	Re    *regexp.Regexp
+	Print func(format string, a ...interface{})
+}
 
 func main() {
 	flag.CommandLine.Usage = func() {
@@ -34,24 +41,95 @@ Options:
 	flag.StringVar(&yellow, "y", "", "yellow - color the matching line with yellow")
 	flag.Parse()
 
-	log.Printf("blue: %s, cyan: %s, green: %s, magenta: %s, red: %s, yellow: %s\n", blue, cyan, green, magenta, red, yellow)
+	if len(os.Args) == 1 {
+		fmt.Fprintf(os.Stderr, "error: no flags provided\n\n")
+		flag.CommandLine.Usage()
+		os.Exit(1)
+	}
 
+	var colors []Color
 	if blue != "" {
-		color.Blue("blue: %s\n", blue)
+		blueRE, err := regexp.Compile(blue)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error: %s\n\n", err)
+		} else {
+			colors = append(colors, Color{Re: blueRE, Print: color.Blue})
+		}
 	}
 	if cyan != "" {
-		color.Cyan("cyan: %s\n", cyan)
+		cyanRE, err := regexp.Compile(cyan)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error: %s\n\n", err)
+		} else {
+			colors = append(colors, Color{Re: cyanRE, Print: color.Cyan})
+		}
 	}
 	if green != "" {
-		color.Green("green: %s\n", green)
+		greenRE, err := regexp.Compile(green)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error: %s\n\n", err)
+		} else {
+			colors = append(colors, Color{Re: greenRE, Print: color.Green})
+		}
 	}
 	if magenta != "" {
-		color.Magenta("magenta: %s\n", magenta)
+		magentaRE, err := regexp.Compile(magenta)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error: %s\n\n", err)
+		} else {
+			colors = append(colors, Color{Re: magentaRE, Print: color.Magenta})
+		}
 	}
 	if red != "" {
-		color.Red("red: %s\n", red)
+		redRE, err := regexp.Compile(red)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error: %s\n\n", err)
+		} else {
+			colors = append(colors, Color{Re: redRE, Print: color.Red})
+		}
 	}
 	if yellow != "" {
-		color.Yellow("yellow: %s\n", yellow)
+		yellowRE, err := regexp.Compile(yellow)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error: %s\n\n", err)
+		} else {
+			colors = append(colors, Color{Re: yellowRE, Print: color.Yellow})
+		}
 	}
+
+	filecontent := `white line
+blue line
+cyan line
+white line
+green line
+magenta line
+white line
+white line
+white line
+red line
+white line
+white line
+yellow line
+white line
+`
+
+	scanner := bufio.NewScanner(strings.NewReader(filecontent))
+	for scanner.Scan() {
+		l := scanner.Text()
+		matchFound := false
+		for _, c := range colors {
+			if c.Re.MatchString(l) {
+				c.Print(l)
+				matchFound = true
+				break
+			}
+		}
+		if !matchFound {
+			fmt.Println(l)
+		}
+	}
+	if err := scanner.Err(); err != nil {
+		fmt.Fprintln(os.Stderr, "reading standard input:", err)
+	}
+
 }
