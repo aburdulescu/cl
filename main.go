@@ -86,6 +86,7 @@ Options:
 		defer file.Close()
 		scanner = bufio.NewScanner(bufio.NewReader(file))
 	}
+	color.NoColor = false // always output color
 	for scanner.Scan() {
 		l := scanner.Text()
 		matchFound := false
