@@ -4,9 +4,9 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"log"
 	"os"
 	"regexp"
-	"strings"
 
 	"github.com/fatih/color"
 )
@@ -75,23 +75,17 @@ Options:
 		colors = append(colors, color)
 	}
 
-	filecontent := `white line
-blue line
-cyan line
-white line
-green line
-magenta line
-white line
-white line
-white line
-red line
-white line
-white line
-yellow line
-white line
-`
-
-	scanner := bufio.NewScanner(strings.NewReader(filecontent))
+	var scanner *bufio.Scanner
+	if len(flag.Args()) == 0 {
+		scanner = bufio.NewScanner(bufio.NewReader(os.Stdin))
+	} else {
+		file, err := os.Open(flag.Arg(0))
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer file.Close()
+		scanner = bufio.NewScanner(bufio.NewReader(file))
+	}
 	for scanner.Scan() {
 		l := scanner.Text()
 		matchFound := false
@@ -109,5 +103,4 @@ white line
 	if err := scanner.Err(); err != nil {
 		fmt.Fprintln(os.Stderr, "reading standard input:", err)
 	}
-
 }
