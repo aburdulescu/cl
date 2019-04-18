@@ -13,7 +13,7 @@ import (
 
 func main() {
 	flag.CommandLine.Usage = func() {
-		header := `%s [OPTIONS PATTERN] INPUT
+		header := `%s [OPTIONS] -cx regex INPUT
 
 Read INPUT and print the lines that match the PATTERN with the color specified by OPTION
 E.g.:
@@ -40,17 +40,25 @@ Options:
 		"red":     &Flag{Print: color.Red},
 		"yellow":  &Flag{Print: color.Yellow},
 	}
+	flag.StringVar(&flags["blue"].Pattern, "cb", "", "blue color")
+	flag.StringVar(&flags["cyan"].Pattern, "cc", "", "cyan color")
+	flag.StringVar(&flags["green"].Pattern, "cg", "", "green color")
+	flag.StringVar(&flags["magenta"].Pattern, "cm", "", "magenta color")
+	flag.StringVar(&flags["red"].Pattern, "cr", "", "red color")
+	flag.StringVar(&flags["yellow"].Pattern, "cy", "", "yellow color")
 
-	flag.StringVar(&flags["blue"].Pattern, "b", "", "blue - color the matching line with blue")
-	flag.StringVar(&flags["cyan"].Pattern, "c", "", "cyan - color the matching line with cyan")
-	flag.StringVar(&flags["green"].Pattern, "g", "", "green - color the matching line with green")
-	flag.StringVar(&flags["magenta"].Pattern, "m", "", "magenta - color the matching line with magenta")
-	flag.StringVar(&flags["red"].Pattern, "r", "", "red - color the matching line with red")
-	flag.StringVar(&flags["yellow"].Pattern, "y", "", "yellow - color the matching line with yellow")
+	var mode string
+	flag.StringVar(&mode, "m", "line", "mode - select mode(line or match)")
+
 	flag.Parse()
 
-	if len(os.Args) == 1 {
+	switch {
+	case len(os.Args) == 1:
 		fmt.Fprintf(os.Stderr, "error: no flags provided\n\n")
+		flag.CommandLine.Usage()
+		os.Exit(1)
+	case len(os.Args) == 3 && os.Args[1] == "-m":
+		fmt.Fprintf(os.Stderr, "error: no color->pattern provided\n\n")
 		flag.CommandLine.Usage()
 		os.Exit(1)
 	}
@@ -86,7 +94,9 @@ Options:
 		defer file.Close()
 		scanner = bufio.NewScanner(bufio.NewReader(file))
 	}
+
 	color.NoColor = false // always output color
+
 	for scanner.Scan() {
 		l := scanner.Text()
 		matchFound := false
