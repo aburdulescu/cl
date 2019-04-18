@@ -15,13 +15,13 @@ func main() {
 	flag.CommandLine.Usage = func() {
 		header := `%s [OPTIONS] -cx regex INPUT
 
-Read INPUT and print the lines that match the PATTERN with the color specified by OPTION
-E.g.:
-1) print the lines from the file file.txt that contain the pattern "foo" with color blue:
-    %s -b "foo" file.txt
+Read INPUT and print the lines that match regex with the color specified by -cx(see Options for colors).
+
+Examples:
+1) color the lines from file "file.txt" that end with "foo" with color blue:
+    %s -cb ".*foo$" file.txt
 
 Options:
-
 `
 		fmt.Fprintf(flag.CommandLine.Output(), header, os.Args[0], os.Args[0])
 		flag.PrintDefaults()
@@ -40,15 +40,15 @@ Options:
 		"red":     &Flag{Print: color.Red},
 		"yellow":  &Flag{Print: color.Yellow},
 	}
-	flag.StringVar(&flags["blue"].Pattern, "cb", "", "blue color")
-	flag.StringVar(&flags["cyan"].Pattern, "cc", "", "cyan color")
-	flag.StringVar(&flags["green"].Pattern, "cg", "", "green color")
-	flag.StringVar(&flags["magenta"].Pattern, "cm", "", "magenta color")
-	flag.StringVar(&flags["red"].Pattern, "cr", "", "red color")
-	flag.StringVar(&flags["yellow"].Pattern, "cy", "", "yellow color")
+	flag.StringVar(&flags["blue"].Pattern, "cb", "", "color blue")
+	flag.StringVar(&flags["cyan"].Pattern, "cc", "", "color cyan")
+	flag.StringVar(&flags["green"].Pattern, "cg", "", "color green")
+	flag.StringVar(&flags["magenta"].Pattern, "cm", "", "color magenta")
+	flag.StringVar(&flags["red"].Pattern, "cr", "", "color red")
+	flag.StringVar(&flags["yellow"].Pattern, "cy", "", "color yellow")
 
 	var mode string
-	flag.StringVar(&mode, "m", "line", "mode - select mode(line or match)")
+	flag.StringVar(&mode, "m", "line", "select mode(line or match)")
 
 	flag.Parse()
 
