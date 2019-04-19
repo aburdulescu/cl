@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
-	"log"
 	"os"
 	"regexp"
 
@@ -50,8 +49,7 @@ Colors:
 	flag.Parse()
 
 	if len(os.Args) == 1 {
-		fmt.Fprintf(os.Stderr, "error: no flags provided\n\n")
-		flag.CommandLine.Usage()
+		fmt.Fprintf(os.Stderr, "error: no flags provided\n")
 		os.Exit(1)
 	}
 
@@ -67,8 +65,7 @@ Colors:
 		}
 		re, err := regexp.Compile(v.pattern)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "cannot create color from given pattern: %s\n\n", v.pattern)
-			flag.CommandLine.Usage()
+			fmt.Fprintf(os.Stderr, "error: %s\n", err)
 			os.Exit(1)
 		}
 		color := Color{Re: re, Func: color.New(v.colorAttr).SprintFunc()}
@@ -81,7 +78,8 @@ Colors:
 	} else {
 		file, err := os.Open(flag.Arg(0))
 		if err != nil {
-			log.Fatal(err)
+			fmt.Fprintf(os.Stderr, "error: %s\n", err)
+			os.Exit(1)
 		}
 		defer file.Close()
 		scanner = bufio.NewScanner(bufio.NewReader(file))
@@ -105,6 +103,7 @@ Colors:
 		}
 	}
 	if err := scanner.Err(); err != nil {
-		fmt.Fprintln(os.Stderr, "reading standard input:", err)
+		fmt.Fprintln(os.Stderr, "error: ", err)
+		os.Exit(1)
 	}
 }
