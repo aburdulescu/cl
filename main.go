@@ -13,73 +13,65 @@ import (
 
 func main() {
 	flag.CommandLine.Usage = func() {
-		header := `%s [OPTIONS] -cx regex INPUT
+		header := `%s -x regex INPUT
 
-Read INPUT and print the lines that match regex with the color specified by -cx(see Options for colors).
+Read INPUT and color the part of the line that matches regex with the
+color specified by -x flag(see Colors).
 
 Examples:
 1) color the lines from file "file.txt" that end with "foo" with color blue:
-    %s -cb ".*foo$" file.txt
+    %s -b ".*foo$" file.txt
 
-Options:
+Colors:
 `
 		fmt.Fprintf(flag.CommandLine.Output(), header, os.Args[0], os.Args[0])
 		flag.PrintDefaults()
 	}
 
 	type Flag struct {
-		Pattern string
-		Print   func(format string, a ...interface{})
+		pattern   string
+		colorAttr color.Attribute
 	}
 
 	flags := map[string]*Flag{
-		"blue":    &Flag{Print: color.Blue},
-		"cyan":    &Flag{Print: color.Cyan},
-		"green":   &Flag{Print: color.Green},
-		"magenta": &Flag{Print: color.Magenta},
-		"red":     &Flag{Print: color.Red},
-		"yellow":  &Flag{Print: color.Yellow},
+		"blue":    &Flag{colorAttr: color.FgBlue},
+		"cyan":    &Flag{colorAttr: color.FgCyan},
+		"green":   &Flag{colorAttr: color.FgGreen},
+		"magenta": &Flag{colorAttr: color.FgMagenta},
+		"red":     &Flag{colorAttr: color.FgRed},
+		"yellow":  &Flag{colorAttr: color.FgYellow},
 	}
-	flag.StringVar(&flags["blue"].Pattern, "cb", "", "color blue")
-	flag.StringVar(&flags["cyan"].Pattern, "cc", "", "color cyan")
-	flag.StringVar(&flags["green"].Pattern, "cg", "", "color green")
-	flag.StringVar(&flags["magenta"].Pattern, "cm", "", "color magenta")
-	flag.StringVar(&flags["red"].Pattern, "cr", "", "color red")
-	flag.StringVar(&flags["yellow"].Pattern, "cy", "", "color yellow")
-
-	var mode string
-	flag.StringVar(&mode, "m", "line", "select mode(line or match)")
-
+	flag.StringVar(&flags["blue"].pattern, "b", "", "color blue")
+	flag.StringVar(&flags["cyan"].pattern, "c", "", "color cyan")
+	flag.StringVar(&flags["green"].pattern, "g", "", "color green")
+	flag.StringVar(&flags["magenta"].pattern, "m", "", "color magenta")
+	flag.StringVar(&flags["red"].pattern, "r", "", "color red")
+	flag.StringVar(&flags["yellow"].pattern, "y", "", "color yellow")
 	flag.Parse()
 
-	switch {
-	case len(os.Args) == 1:
+	if len(os.Args) == 1 {
 		fmt.Fprintf(os.Stderr, "error: no flags provided\n\n")
-		flag.CommandLine.Usage()
-		os.Exit(1)
-	case len(os.Args) == 3 && os.Args[1] == "-m":
-		fmt.Fprintf(os.Stderr, "error: no color->pattern provided\n\n")
 		flag.CommandLine.Usage()
 		os.Exit(1)
 	}
 
 	type Color struct {
-		Re    *regexp.Regexp
-		Print func(format string, a ...interface{})
+		Re   *regexp.Regexp
+		Func func(a ...interface{}) string
 	}
 
 	var colors []Color
 	for _, v := range flags {
-		if v.Pattern == "" {
+		if v.pattern == "" {
 			continue
 		}
-		re, err := regexp.Compile(v.Pattern)
+		re, err := regexp.Compile(v.pattern)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "cannot create color from given pattern: %s\n\n", v.Pattern)
+			fmt.Fprintf(os.Stderr, "cannot create color from given pattern: %s\n\n", v.pattern)
 			flag.CommandLine.Usage()
 			os.Exit(1)
 		}
-		color := Color{Re: re, Print: v.Print}
+		color := Color{Re: re, Func: color.New(v.colorAttr).SprintFunc()}
 		colors = append(colors, color)
 	}
 
@@ -101,8 +93,9 @@ Options:
 		l := scanner.Text()
 		matchFound := false
 		for _, c := range colors {
-			if c.Re.MatchString(l) {
-				c.Print(l)
+			loc := c.Re.FindIndex([]byte(l))
+			if loc != nil {
+				fmt.Printf("%s%s%s\n", l[:loc[0]], c.Func(l[loc[0]:loc[1]]), l[loc[1]:])
 				matchFound = true
 				break
 			}
