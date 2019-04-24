@@ -10,6 +10,21 @@ import (
 	"github.com/fatih/color"
 )
 
+type Color struct {
+	Re   *regexp.Regexp
+	Func func(a ...interface{}) string
+}
+
+func colorLine(colors []Color, line string) string {
+	for _, c := range colors {
+		loc := c.Re.FindIndex([]byte(line))
+		if loc != nil {
+			return line[:loc[0]] + c.Func(line[loc[0]:loc[1]]) + line[loc[1]:]
+		}
+	}
+	return line
+}
+
 func main() {
 	flag.CommandLine.Usage = func() {
 		header := `%s -x regex INPUT
@@ -53,11 +68,6 @@ Colors:
 		os.Exit(1)
 	}
 
-	type Color struct {
-		Re   *regexp.Regexp
-		Func func(a ...interface{}) string
-	}
-
 	var colors []Color
 	for _, v := range flags {
 		if v.pattern == "" {
@@ -88,19 +98,7 @@ Colors:
 	color.NoColor = false // always output color
 
 	for scanner.Scan() {
-		l := scanner.Text()
-		matchFound := false
-		for _, c := range colors {
-			loc := c.Re.FindIndex([]byte(l))
-			if loc != nil {
-				fmt.Printf("%s%s%s\n", l[:loc[0]], c.Func(l[loc[0]:loc[1]]), l[loc[1]:])
-				matchFound = true
-				break
-			}
-		}
-		if !matchFound {
-			fmt.Println(l)
-		}
+		fmt.Println(colorLine(colors, scanner.Text()))
 	}
 	if err := scanner.Err(); err != nil {
 		fmt.Fprintln(os.Stderr, "error: ", err)
