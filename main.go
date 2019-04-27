@@ -15,14 +15,37 @@ type Color struct {
 	Func func(a ...interface{}) string
 }
 
-func colorLine(colors []Color, line string) string {
-	for _, c := range colors {
-		loc := c.Re.FindIndex([]byte(line))
-		if loc != nil {
-			return line[:loc[0]] + c.Func(line[loc[0]:loc[1]]) + line[loc[1]:]
+func contains(idxs [][]int, i int) bool {
+	for _, idx := range idxs {
+		if i >= idx[0] && i < idx[1] {
+			return true
 		}
 	}
-	return line
+	return false
+}
+
+func printLine(colors []Color, line string) {
+	var idxs [][]int
+	var f func(a ...interface{}) string
+	for _, c := range colors {
+		idxs = c.Re.FindAllIndex([]byte(line), -1)
+		if idxs != nil {
+			f = c.Func
+			break
+		}
+	}
+	if idxs == nil {
+		fmt.Println(line)
+		return
+	}
+	for i, c := range line {
+		if contains(idxs, i) {
+			fmt.Print(f(string(c)))
+		} else {
+			fmt.Print(string(c))
+		}
+	}
+	fmt.Println()
 }
 
 func main() {
@@ -98,7 +121,7 @@ Colors:
 	color.NoColor = false // always output color
 
 	for scanner.Scan() {
-		fmt.Println(colorLine(colors, scanner.Text()))
+		printLine(colors, scanner.Text())
 	}
 	if err := scanner.Err(); err != nil {
 		fmt.Fprintln(os.Stderr, "error: ", err)
