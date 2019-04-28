@@ -8,6 +8,7 @@ import (
 	"os"
 	"regexp"
 	"runtime/pprof"
+	"strings"
 
 	"github.com/fatih/color"
 )
@@ -40,15 +41,16 @@ func printLine(colors []Color, line string) {
 		fmt.Println(line)
 		return
 	}
-	output := ""
+	var output strings.Builder
+	output.Grow(len(line))
 	for i, c := range line {
 		if contains(idxs, i) {
-			output += f(string(c))
+			output.WriteString(f(string(c)))
 		} else {
-			output += string(c)
+			output.WriteRune(c)
 		}
 	}
-	fmt.Println(output)
+	fmt.Println(output.String())
 }
 
 func main() {
