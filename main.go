@@ -4,8 +4,10 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"log"
 	"os"
 	"regexp"
+	"runtime/pprof"
 
 	"github.com/fatih/color"
 )
@@ -38,14 +40,15 @@ func printLine(colors []Color, line string) {
 		fmt.Println(line)
 		return
 	}
+	output := ""
 	for i, c := range line {
 		if contains(idxs, i) {
-			fmt.Print(f(string(c)))
+			output += f(string(c))
 		} else {
-			fmt.Print(string(c))
+			output += string(c)
 		}
 	}
-	fmt.Println()
+	fmt.Println(output)
 }
 
 func main() {
@@ -84,7 +87,19 @@ Colors:
 	flag.StringVar(&flags["magenta"].pattern, "m", "", "color magenta")
 	flag.StringVar(&flags["red"].pattern, "r", "", "color red")
 	flag.StringVar(&flags["yellow"].pattern, "y", "", "color yellow")
+
+	var cpuprof string
+	flag.StringVar(&cpuprof, "cpuprof", "", "write cpu profile to file")
 	flag.Parse()
+
+	if cpuprof != "" {
+		f, err := os.Create(cpuprof)
+		if err != nil {
+			log.Fatal(err)
+		}
+		pprof.StartCPUProfile(f)
+		defer pprof.StopCPUProfile()
+	}
 
 	if len(os.Args) == 1 {
 		fmt.Fprintf(os.Stderr, "error: no flags provided\n")
