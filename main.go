@@ -27,7 +27,7 @@ func contains(idxs [][]int, i int) bool {
 	return false
 }
 
-func printLine(colors []Color, line string) {
+func colorLine(colors []Color, line string) string {
 	var idxs [][]int
 	var f func(a ...interface{}) string
 	for _, c := range colors {
@@ -38,8 +38,7 @@ func printLine(colors []Color, line string) {
 		}
 	}
 	if idxs == nil {
-		fmt.Println(line)
-		return
+		return line
 	}
 	var output strings.Builder
 	output.Grow(len(line))
@@ -50,7 +49,7 @@ func printLine(colors []Color, line string) {
 			output.WriteRune(c)
 		}
 	}
-	fmt.Println(output.String())
+	return output.String()
 }
 
 func main() {
@@ -136,10 +135,17 @@ Colors:
 	}
 
 	color.NoColor = false // always output color
-
+	w := bufio.NewWriter(os.Stdout)
 	for scanner.Scan() {
-		printLine(colors, scanner.Text())
+		line := colorLine(colors, scanner.Text())
+		var output strings.Builder
+		fmt.Fprintf(&output, "%s\n", line)
+		if _, err := w.WriteString(output.String()); err != nil {
+			fmt.Fprintln(os.Stderr, "error: ", err)
+			os.Exit(1)
+		}
 	}
+	w.Flush()
 	if err := scanner.Err(); err != nil {
 		fmt.Fprintln(os.Stderr, "error: ", err)
 		os.Exit(1)
