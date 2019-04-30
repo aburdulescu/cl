@@ -100,10 +100,8 @@ Colors:
 	color.NoColor = false // always output color
 	w := bufio.NewWriter(os.Stdout)
 	for scanner.Scan() {
-		line := colorLine(colors, scanner.Text())
-		var output strings.Builder
-		fmt.Fprintf(&output, "%s\n", line)
-		if _, err := w.WriteString(output.String()); err != nil {
+		_, err := w.WriteString(colorLine(colors, scanner.Text()) + "\n")
+		if err != nil {
 			mainError(err)
 		}
 	}
@@ -156,9 +154,10 @@ func colorLine(colors []Color, line string) string {
 	if idxsSer[0] != 0 {
 		output.WriteString(line[:idxsSer[0]])
 	}
+	coloredStr := f(line[idxsSer[0]:idxsSer[1]])
 	for start, end := 0, 1; end < len(idxsSer); {
 		if start%2 == 0 {
-			output.WriteString(f(line[idxsSer[start]:idxsSer[end]]))
+			output.WriteString(coloredStr)
 		} else {
 			output.WriteString(line[idxsSer[start]:idxsSer[end]])
 		}
