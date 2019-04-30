@@ -40,15 +40,35 @@ func colorLine(colors []Color, line string) string {
 	if idxs == nil {
 		return line
 	}
+
 	var output strings.Builder
 	output.Grow(len(line))
-	for i, c := range line {
-		if contains(idxs, i) {
-			output.WriteString(f(string(c)))
-		} else {
-			output.WriteRune(c)
-		}
+
+	idxsSer := make([]int, len(idxs)*2)
+	k := 0
+	for _, idx := range idxs {
+		idxsSer[k] = idx[0]
+		k++
+		idxsSer[k] = idx[1]
+		k++
 	}
+
+	if idxsSer[0] != 0 {
+		output.WriteString(line[:idxsSer[0]])
+	}
+	for start, end := 0, 1; end < len(idxsSer); {
+		if start%2 == 0 {
+			output.WriteString(f(line[idxsSer[start]:idxsSer[end]]))
+		} else {
+			output.WriteString(line[idxsSer[start]:idxsSer[end]])
+		}
+		start++
+		end++
+	}
+	if idxsSer[len(idxsSer)-1] < len(line) {
+		output.WriteString(line[idxsSer[len(idxsSer)-1]:len(line)])
+	}
+
 	return output.String()
 }
 
