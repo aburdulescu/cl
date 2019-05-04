@@ -112,46 +112,46 @@ func contains(idxs [][]int, i int) bool {
 }
 
 func colorLine(colors []Color, line string) string {
-	var idxs [][]int
+	var idxPairs [][]int
 	var f func(a ...interface{}) string
 	for _, c := range colors {
-		idxs = c.Re.FindAllIndex([]byte(line), -1)
-		if idxs != nil {
+		idxPairs = c.Re.FindAllIndex([]byte(line), -1)
+		if idxPairs != nil {
 			f = c.Func
 			break
 		}
 	}
-	if idxs == nil {
+	if idxPairs == nil {
 		return line
 	}
 
 	var output strings.Builder
 	output.Grow(len(line))
 
-	idxsSer := make([]int, len(idxs)*2)
+	idxs := make([]int, len(idxPairs)*2)
 	k := 0
-	for _, idx := range idxs {
-		idxsSer[k] = idx[0]
+	for _, idx := range idxPairs {
+		idxs[k] = idx[0]
 		k++
-		idxsSer[k] = idx[1]
+		idxs[k] = idx[1]
 		k++
 	}
 
-	if idxsSer[0] != 0 {
-		output.WriteString(line[:idxsSer[0]])
+	if idxs[0] != 0 {
+		output.WriteString(line[:idxs[0]])
 	}
-	coloredStr := f(line[idxsSer[0]:idxsSer[1]])
-	for start, end := 0, 1; end < len(idxsSer); {
+	coloredStr := f(line[idxs[0]:idxs[1]])
+	for start, end := 0, 1; end < len(idxs); {
 		if start%2 == 0 {
 			output.WriteString(coloredStr)
 		} else {
-			output.WriteString(line[idxsSer[start]:idxsSer[end]])
+			output.WriteString(line[idxs[start]:idxs[end]])
 		}
 		start++
 		end++
 	}
-	if idxsSer[len(idxsSer)-1] < len(line) {
-		output.WriteString(line[idxsSer[len(idxsSer)-1]:len(line)])
+	if idxs[len(idxs)-1] < len(line) {
+		output.WriteString(line[idxs[len(idxs)-1]:len(line)])
 	}
 
 	return output.String()
