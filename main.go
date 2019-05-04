@@ -34,7 +34,7 @@ func main() {
 	}
 
 	colors, err := clutil.CreateColors(flags)
-	if err == nil {
+	if err != nil {
 		mainError(err)
 	}
 
