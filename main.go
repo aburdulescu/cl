@@ -2,8 +2,10 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"os"
 
 	"github.com/fatih/color"
@@ -21,16 +23,33 @@ func main() {
 		"red":     &clutil.Flag{ColorAttr: color.FgRed},
 		"yellow":  &clutil.Flag{ColorAttr: color.FgYellow},
 	}
-	flag.StringVar(&flags["blue"].Pattern, "b", "", "color blue")
-	flag.StringVar(&flags["cyan"].Pattern, "c", "", "color cyan")
-	flag.StringVar(&flags["green"].Pattern, "g", "", "color green")
-	flag.StringVar(&flags["magenta"].Pattern, "m", "", "color magenta")
-	flag.StringVar(&flags["red"].Pattern, "r", "", "color red")
-	flag.StringVar(&flags["yellow"].Pattern, "y", "", "color yellow")
+	flag.StringVar(&flags["blue"].Pattern, "cb", "", "color blue")
+	flag.StringVar(&flags["cyan"].Pattern, "cc", "", "color cyan")
+	flag.StringVar(&flags["green"].Pattern, "cg", "", "color green")
+	flag.StringVar(&flags["magenta"].Pattern, "cm", "", "color magenta")
+	flag.StringVar(&flags["red"].Pattern, "cr", "", "color red")
+	flag.StringVar(&flags["yellow"].Pattern, "cy", "", "color yellow")
+	var filter string
+	flag.StringVar(&filter, "f", "", "apply color filter")
 	flag.Parse()
 
 	if len(os.Args) == 1 {
 		mainError(fmt.Errorf("no flags provided"))
+	}
+
+	if filter != "" {
+		d, err := ioutil.ReadFile(filter)
+		if err != nil {
+			mainError(err)
+		}
+		data := make(map[string]string)
+		err = json.Unmarshal(d, &data)
+		if err != nil {
+			mainError(err)
+		}
+		for k, v := range data {
+			flags[k].Pattern = v
+		}
 	}
 
 	colors, err := clutil.CreateColors(flags)
