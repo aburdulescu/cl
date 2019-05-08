@@ -8,8 +8,8 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/aburdulescu/cl/clutil"
 	"github.com/fatih/color"
-	"gitlab.com/aburdulescu/cl/clutil"
 )
 
 func main() {
