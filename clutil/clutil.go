@@ -1,6 +1,8 @@
 package clutil
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"regexp"
 	"strings"
 
@@ -94,4 +96,20 @@ func CreateColors(flags map[string]*Flag) ([]Color, error) {
 		colors = append(colors, color)
 	}
 	return colors, nil
+}
+
+func FilterToFlags(filter string, flags map[string]*Flag) error {
+	d, err := ioutil.ReadFile(filter)
+	if err != nil {
+		return err
+	}
+	data := make(map[string]string)
+	err = json.Unmarshal(d, &data)
+	if err != nil {
+		return err
+	}
+	for k, v := range data {
+		flags[k].Pattern = v
+	}
+	return nil
 }

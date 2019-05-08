@@ -2,10 +2,8 @@ package main
 
 import (
 	"bufio"
-	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"os"
 
 	"github.com/aburdulescu/cl/clutil"
@@ -38,17 +36,9 @@ func main() {
 	}
 
 	if filter != "" {
-		d, err := ioutil.ReadFile(filter)
+		err := clutil.FilterToFlags(filter, flags)
 		if err != nil {
 			mainError(err)
-		}
-		data := make(map[string]string)
-		err = json.Unmarshal(d, &data)
-		if err != nil {
-			mainError(err)
-		}
-		for k, v := range data {
-			flags[k].Pattern = v
 		}
 	}
 
