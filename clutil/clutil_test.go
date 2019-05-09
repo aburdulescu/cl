@@ -27,13 +27,17 @@ func TestColorLine(t *testing.T) {
 		{
 			"bla foo bla foo bla",
 			fmt.Sprintf(
-				"bla "+escFmt+" bla "+escFmt+" bla", color.FgBlue, "foo", color.FgBlue, "foo",
+				"bla "+escFmt+" bla "+escFmt+" bla",
+				flags["blue"].ColorAttr, flags["blue"].Pattern,
+				flags["blue"].ColorAttr, flags["blue"].Pattern,
 			),
 		},
 		{
 			"bla bar bla bar bla",
 			fmt.Sprintf(
-				"bla "+escFmt+" bla "+escFmt+" bla", color.FgGreen, "bar", color.FgGreen, "bar",
+				"bla "+escFmt+" bla "+escFmt+" bla",
+				flags["green"].ColorAttr, flags["green"].Pattern,
+				flags["green"].ColorAttr, flags["green"].Pattern,
 			),
 		},
 	}
