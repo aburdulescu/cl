@@ -9,8 +9,12 @@ import (
 
 func TestColorLine(t *testing.T) {
 	flags := map[string]*Flag{
-		"blue":  {"foo", color.FgBlue},
-		"green": {"bar", color.FgGreen},
+		"blue":    {"blue", color.FgBlue},
+		"cyan":    {"cyan", color.FgCyan},
+		"green":   {"green", color.FgGreen},
+		"magenta": {"magenta", color.FgMagenta},
+		"red":     {"red", color.FgRed},
+		"yellow":  {"yellow", color.FgYellow},
 	}
 	colors, err := CreateColors(flags)
 	if err != nil {
@@ -25,19 +29,51 @@ func TestColorLine(t *testing.T) {
 		expected string
 	}{
 		{
-			"bla foo bla foo bla",
+			"bla" + flags["blue"].Pattern + "bla" + flags["blue"].Pattern + "bla",
 			fmt.Sprintf(
-				"bla "+escFmt+" bla "+escFmt+" bla",
+				"bla"+escFmt+"bla"+escFmt+"bla",
 				flags["blue"].ColorAttr, flags["blue"].Pattern,
 				flags["blue"].ColorAttr, flags["blue"].Pattern,
 			),
 		},
 		{
-			"bla bar bla bar bla",
+			"bla" + flags["cyan"].Pattern + "bla" + flags["cyan"].Pattern + "bla",
 			fmt.Sprintf(
-				"bla "+escFmt+" bla "+escFmt+" bla",
+				"bla"+escFmt+"bla"+escFmt+"bla",
+				flags["cyan"].ColorAttr, flags["cyan"].Pattern,
+				flags["cyan"].ColorAttr, flags["cyan"].Pattern,
+			),
+		},
+		{
+			"bla" + flags["green"].Pattern + "bla" + flags["green"].Pattern + "bla",
+			fmt.Sprintf(
+				"bla"+escFmt+"bla"+escFmt+"bla",
 				flags["green"].ColorAttr, flags["green"].Pattern,
 				flags["green"].ColorAttr, flags["green"].Pattern,
+			),
+		},
+		{
+			"bla" + flags["magenta"].Pattern + "bla" + flags["magenta"].Pattern + "bla",
+			fmt.Sprintf(
+				"bla"+escFmt+"bla"+escFmt+"bla",
+				flags["magenta"].ColorAttr, flags["magenta"].Pattern,
+				flags["magenta"].ColorAttr, flags["magenta"].Pattern,
+			),
+		},
+		{
+			"bla" + flags["red"].Pattern + "bla" + flags["red"].Pattern + "bla",
+			fmt.Sprintf(
+				"bla"+escFmt+"bla"+escFmt+"bla",
+				flags["red"].ColorAttr, flags["red"].Pattern,
+				flags["red"].ColorAttr, flags["red"].Pattern,
+			),
+		},
+		{
+			"bla" + flags["yellow"].Pattern + "bla" + flags["yellow"].Pattern + "bla",
+			fmt.Sprintf(
+				"bla"+escFmt+"bla"+escFmt+"bla",
+				flags["yellow"].ColorAttr, flags["yellow"].Pattern,
+				flags["yellow"].ColorAttr, flags["yellow"].Pattern,
 			),
 		},
 	}
