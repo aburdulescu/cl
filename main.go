@@ -14,12 +14,12 @@ func main() {
 	flag.CommandLine.Usage = usage
 
 	flags := map[string]*clutil.Flag{
-		"blue":    &clutil.Flag{ColorAttr: color.FgBlue},
-		"cyan":    &clutil.Flag{ColorAttr: color.FgCyan},
-		"green":   &clutil.Flag{ColorAttr: color.FgGreen},
-		"magenta": &clutil.Flag{ColorAttr: color.FgMagenta},
-		"red":     &clutil.Flag{ColorAttr: color.FgRed},
-		"yellow":  &clutil.Flag{ColorAttr: color.FgYellow},
+		"blue":    {ColorAttr: color.FgBlue},
+		"cyan":    {ColorAttr: color.FgCyan},
+		"green":   {ColorAttr: color.FgGreen},
+		"magenta": {ColorAttr: color.FgMagenta},
+		"red":     {ColorAttr: color.FgRed},
+		"yellow":  {ColorAttr: color.FgYellow},
 	}
 	flag.StringVar(&flags["blue"].Pattern, "cb", "", "color blue")
 	flag.StringVar(&flags["cyan"].Pattern, "cc", "", "color cyan")

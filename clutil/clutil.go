@@ -73,7 +73,7 @@ func ColorLine(colors []Color, line string) string {
 		end++
 	}
 	if idxs[len(idxs)-1] < len(line) {
-		output.WriteString(line[idxs[len(idxs)-1]:len(line)])
+		output.WriteString(line[idxs[len(idxs)-1]:])
 	}
 
 	return output.String()
