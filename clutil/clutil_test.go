@@ -17,12 +17,26 @@ func TestColorLine(t *testing.T) {
 		t.Fatalf("couldn't create colors: %v", err)
 	}
 
+	escS := "\x1b[%dm"
+	escE := "\x1b[0m"
 	testData := []struct {
 		input    string
 		expected string
 	}{
-		{"bla bla foo bla", fmt.Sprintf("bla bla \x1b[%dmfoo\x1b[0m bla", color.FgBlue)},
-		{"bla bla bar bla", fmt.Sprintf("bla bla \x1b[%dmbar\x1b[0m bla", color.FgGreen)},
+		{
+			"bla foo bla foo bla",
+			fmt.Sprintf(
+				"bla "+escS+"foo"+escE+" bla "+escS+"foo"+escE+" bla",
+				color.FgBlue, color.FgBlue,
+			),
+		},
+		{
+			"bla bar bla bar bla",
+			fmt.Sprintf(
+				"bla "+escS+"bar"+escE+" bla "+escS+"bar"+escE+" bla",
+				color.FgGreen, color.FgGreen,
+			),
+		},
 	}
 
 	for _, v := range testData {
