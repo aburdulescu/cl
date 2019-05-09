@@ -19,6 +19,7 @@ func TestColorLine(t *testing.T) {
 
 	escS := "\x1b[%dm"
 	escE := "\x1b[0m"
+	escFmt := escS + "%s" + escE
 	testData := []struct {
 		input    string
 		expected string
@@ -26,15 +27,13 @@ func TestColorLine(t *testing.T) {
 		{
 			"bla foo bla foo bla",
 			fmt.Sprintf(
-				"bla "+escS+"foo"+escE+" bla "+escS+"foo"+escE+" bla",
-				color.FgBlue, color.FgBlue,
+				"bla "+escFmt+" bla "+escFmt+" bla", color.FgBlue, "foo", color.FgBlue, "foo",
 			),
 		},
 		{
 			"bla bar bla bar bla",
 			fmt.Sprintf(
-				"bla "+escS+"bar"+escE+" bla "+escS+"bar"+escE+" bla",
-				color.FgGreen, color.FgGreen,
+				"bla "+escFmt+" bla "+escFmt+" bla", color.FgGreen, "bar", color.FgGreen, "bar",
 			),
 		},
 	}
