@@ -6,14 +6,14 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/aburdulescu/cl/clutil"
+	"github.com/aburdulescu/cl"
 	"github.com/fatih/color"
 )
 
 func main() {
 	flag.CommandLine.Usage = usage
 
-	flags := map[string]*clutil.Flag{
+	flags := map[string]*cl.Flag{
 		"blue":    {ColorAttr: color.FgBlue},
 		"cyan":    {ColorAttr: color.FgCyan},
 		"green":   {ColorAttr: color.FgGreen},
@@ -36,13 +36,13 @@ func main() {
 	}
 
 	if filter != "" {
-		err := clutil.FilterToFlags(filter, flags)
+		err := cl.FilterToFlags(filter, flags)
 		if err != nil {
 			mainError(err)
 		}
 	}
 
-	colors, err := clutil.CreateColors(flags)
+	colors, err := cl.CreateColors(flags)
 	if err != nil {
 		mainError(err)
 	}
@@ -63,7 +63,7 @@ func main() {
 
 	w := bufio.NewWriter(os.Stdout)
 	for scanner.Scan() {
-		_, err := w.WriteString(clutil.ColorLine(colors, scanner.Text()) + "\n")
+		_, err := w.WriteString(cl.ColorLine(colors, scanner.Text()) + "\n")
 		if err != nil {
 			mainError(err)
 		}

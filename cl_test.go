@@ -1,4 +1,4 @@
-package clutil
+package cl
 
 import (
 	"fmt"
