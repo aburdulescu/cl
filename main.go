@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/aburdulescu/cl"
+	"github.com/aburdulescu/cl/pkg/cl"
 	"github.com/fatih/color"
 )
 
