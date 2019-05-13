@@ -1,11 +1,10 @@
 package cl
 
 import (
-	"encoding/json"
-	"io/ioutil"
 	"regexp"
 	"strings"
 
+	"github.com/aburdulescu/cl/pkg/flags"
 	"github.com/fatih/color"
 )
 
@@ -14,30 +13,23 @@ type Color struct {
 	Func func(a ...interface{}) string
 }
 
-type Flag struct {
-	Pattern   string
-	ColorAttr color.Attribute
-}
-
-func contains(idxs [][]int, i int) bool {
-	for _, idx := range idxs {
-		if i >= idx[0] && i < idx[1] {
-			return true
+func CreateColors(flags flags.Flags) ([]Color, error) {
+	var colors []Color
+	for _, v := range flags {
+		if v.Pattern == "" {
+			continue
 		}
+		re, err := regexp.Compile(v.Pattern)
+		if err != nil {
+			return nil, err
+		}
+		color := Color{
+			Re:   re,
+			Func: color.New(v.ColorAttr).SprintFunc(),
+		}
+		colors = append(colors, color)
 	}
-	return false
-}
-
-func idxPairsToIdxSlice(idxPairs [][]int) []int {
-	idxs := make([]int, len(idxPairs)*2)
-	k := 0
-	for _, idx := range idxPairs {
-		idxs[k] = idx[0]
-		k++
-		idxs[k] = idx[1]
-		k++
-	}
-	return idxs
+	return colors, nil
 }
 
 func ColorLine(colors []Color, line string) string {
@@ -79,37 +71,23 @@ func ColorLine(colors []Color, line string) string {
 	return output.String()
 }
 
-func CreateColors(flags map[string]*Flag) ([]Color, error) {
-	var colors []Color
-	for _, v := range flags {
-		if v.Pattern == "" {
-			continue
+func contains(idxs [][]int, i int) bool {
+	for _, idx := range idxs {
+		if i >= idx[0] && i < idx[1] {
+			return true
 		}
-		re, err := regexp.Compile(v.Pattern)
-		if err != nil {
-			return nil, err
-		}
-		color := Color{
-			Re:   re,
-			Func: color.New(v.ColorAttr).SprintFunc(),
-		}
-		colors = append(colors, color)
 	}
-	return colors, nil
+	return false
 }
 
-func FilterToFlags(filter string, flags map[string]*Flag) error {
-	d, err := ioutil.ReadFile(filter)
-	if err != nil {
-		return err
+func idxPairsToIdxSlice(idxPairs [][]int) []int {
+	idxs := make([]int, len(idxPairs)*2)
+	k := 0
+	for _, idx := range idxPairs {
+		idxs[k] = idx[0]
+		k++
+		idxs[k] = idx[1]
+		k++
 	}
-	data := make(map[string]string)
-	err = json.Unmarshal(d, &data)
-	if err != nil {
-		return err
-	}
-	for k, v := range data {
-		flags[k].Pattern = v
-	}
-	return nil
+	return idxs
 }

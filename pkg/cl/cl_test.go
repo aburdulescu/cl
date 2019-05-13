@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/aburdulescu/cl/pkg/flags"
 	"github.com/fatih/color"
 )
 
 func TestColorLine(t *testing.T) {
-	flags := map[string]*Flag{
+	flags := flags.Flags{
 		"blue":    {"blue", color.FgBlue},
 		"cyan":    {"cyan", color.FgCyan},
 		"green":   {"green", color.FgGreen},
