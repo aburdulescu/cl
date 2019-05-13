@@ -7,13 +7,14 @@ import (
 	"os"
 
 	"github.com/aburdulescu/cl/pkg/cl"
+	"github.com/aburdulescu/cl/pkg/flags"
 	"github.com/fatih/color"
 )
 
 func main() {
 	flag.CommandLine.Usage = usage
 
-	flags := map[string]*cl.Flag{
+	flags := flags.Flags{
 		"blue":    {ColorAttr: color.FgBlue},
 		"cyan":    {ColorAttr: color.FgCyan},
 		"green":   {ColorAttr: color.FgGreen},
@@ -36,7 +37,7 @@ func main() {
 	}
 
 	if filter != "" {
-		err := cl.FilterToFlags(filter, flags)
+		err := flags.FromFilter(filter)
 		if err != nil {
 			mainError(err)
 		}
