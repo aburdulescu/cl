@@ -14,7 +14,7 @@ import (
 func main() {
 	flag.CommandLine.Usage = usage
 
-	flags := flags.Flags{
+	f := flags.Flags{
 		"blue":    {ColorAttr: color.FgBlue},
 		"cyan":    {ColorAttr: color.FgCyan},
 		"green":   {ColorAttr: color.FgGreen},
@@ -22,12 +22,12 @@ func main() {
 		"red":     {ColorAttr: color.FgRed},
 		"yellow":  {ColorAttr: color.FgYellow},
 	}
-	flag.StringVar(&flags["blue"].Pattern, "cb", "", "color blue")
-	flag.StringVar(&flags["cyan"].Pattern, "cc", "", "color cyan")
-	flag.StringVar(&flags["green"].Pattern, "cg", "", "color green")
-	flag.StringVar(&flags["magenta"].Pattern, "cm", "", "color magenta")
-	flag.StringVar(&flags["red"].Pattern, "cr", "", "color red")
-	flag.StringVar(&flags["yellow"].Pattern, "cy", "", "color yellow")
+	flag.StringVar(&f["blue"].Pattern, "cb", "", "color blue")
+	flag.StringVar(&f["cyan"].Pattern, "cc", "", "color cyan")
+	flag.StringVar(&f["green"].Pattern, "cg", "", "color green")
+	flag.StringVar(&f["magenta"].Pattern, "cm", "", "color magenta")
+	flag.StringVar(&f["red"].Pattern, "cr", "", "color red")
+	flag.StringVar(&f["yellow"].Pattern, "cy", "", "color yellow")
 	var filter string
 	flag.StringVar(&filter, "f", "", "apply color filter")
 	flag.Parse()
@@ -37,13 +37,13 @@ func main() {
 	}
 
 	if filter != "" {
-		err := flags.FromFilter(filter)
+		err := flags.FromFilter(filter, f)
 		if err != nil {
 			mainError(err)
 		}
 	}
 
-	colors, err := cl.CreateColors(flags)
+	colors, err := cl.CreateColors(f)
 	if err != nil {
 		mainError(err)
 	}
