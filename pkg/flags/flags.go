@@ -46,3 +46,19 @@ func (f Flags) ToFilter(filter string) error {
 	}
 	return nil
 }
+
+func (f0 Flags) Equals(f1 Flags) bool {
+	for f1k, f1v := range f1 {
+		f0v, ok := f0[f1k]
+		if !ok {
+			return false
+		}
+		if f0v.Pattern != f1v.Pattern {
+			return false
+		}
+		if f0v.ColorAttr != f1v.ColorAttr {
+			return false
+		}
+	}
+	return true
+}

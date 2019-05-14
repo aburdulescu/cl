@@ -3,7 +3,6 @@ package flags
 import (
 	"io/ioutil"
 	"os"
-	"reflect"
 	"testing"
 
 	"github.com/fatih/color"
@@ -28,6 +27,9 @@ func TestFromFilterJsonUmarshalFails(t *testing.T) {
 	if err == nil {
 		t.Errorf("FilterToFlags should return error if filter file has wrong content")
 	}
+	if err := os.Remove("example.cl"); err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestFromFilterSuccesfull(t *testing.T) {
@@ -35,16 +37,20 @@ func TestFromFilterSuccesfull(t *testing.T) {
 		"blue":   {".*foo", color.FgBlue},
 		"yellow": {".*bar", color.FgYellow},
 	}
-	err := writtenFlags.ToFilter("example.cl")
-	if err != nil {
+	if err := writtenFlags.ToFilter("example.cl"); err != nil {
 		t.Fatal(err)
 	}
-	readFlags := make(Flags)
-	err = readFlags.FromFilter("example.cl")
-	if err != nil {
+	readFlags := Flags{
+		"blue":   {ColorAttr: color.FgBlue},
+		"yellow": {ColorAttr: color.FgYellow},
+	}
+	if err := readFlags.FromFilter("example.cl"); err != nil {
 		t.Fatal(err)
 	}
-	if reflect.DeepEqual(writtenFlags, readFlags) {
+	if !readFlags.Equals(writtenFlags) {
 		t.Error("written flags aren't equal to read flags")
+	}
+	if err := os.Remove("example.cl"); err != nil {
+		t.Fatal(err)
 	}
 }
