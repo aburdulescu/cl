@@ -10,7 +10,7 @@ import (
 
 func TestFromFilterFilterFileDoesntExist(t *testing.T) {
 	var flags Flags
-	err := flags.FromFilter("foo.bar")
+	err := FromFilter("foo.bar", flags)
 	if err == nil {
 		t.Errorf("FilterToFlags should return error if filter file doesn't exist")
 	}
@@ -23,7 +23,7 @@ func TestFromFilterJsonUmarshalFails(t *testing.T) {
 		t.Fatal(err)
 	}
 	var flags Flags
-	err = flags.FromFilter(filterFileName)
+	err = FromFilter(filterFileName, flags)
 	if err == nil {
 		t.Errorf("FilterToFlags should return error if filter file has wrong content")
 	}
@@ -37,14 +37,14 @@ func TestFromFilterSuccesfull(t *testing.T) {
 		"blue":   {".*foo", color.FgBlue},
 		"yellow": {".*bar", color.FgYellow},
 	}
-	if err := writtenFlags.ToFilter("example.cl"); err != nil {
+	if err := ToFilter(writtenFlags, "example.cl"); err != nil {
 		t.Fatal(err)
 	}
 	readFlags := Flags{
 		"blue":   {ColorAttr: color.FgBlue},
 		"yellow": {ColorAttr: color.FgYellow},
 	}
-	if err := readFlags.FromFilter("example.cl"); err != nil {
+	if err := FromFilter("example.cl", readFlags); err != nil {
 		t.Fatal(err)
 	}
 	if !readFlags.Equals(writtenFlags) {

@@ -15,7 +15,7 @@ type Flag struct {
 
 type Flags map[string]*Flag
 
-func (f Flags) FromFilter(filter string) error {
+func FromFilter(filter string, flags Flags) error {
 	d, err := ioutil.ReadFile(filter)
 	if err != nil {
 		return err
@@ -26,14 +26,14 @@ func (f Flags) FromFilter(filter string) error {
 		return err
 	}
 	for k, v := range data {
-		f[k].Pattern = v
+		flags[k].Pattern = v
 	}
 	return nil
 }
 
-func (f Flags) ToFilter(filter string) error {
+func ToFilter(flags Flags, filter string) error {
 	data := make(map[string]string)
-	for k, v := range f {
+	for k, v := range flags {
 		data[k] = v.Pattern
 	}
 	b, err := json.Marshal(data)
