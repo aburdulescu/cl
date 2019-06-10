@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -x
+#set -x
 
 create_asset() {
     if [[ $# -ne 3 ]]
@@ -23,7 +23,7 @@ create_asset() {
     mkdir -p $ASSETDIR
 
     # build stripped binary
-    GOOS=$OS GOARCH=$ARCH go build -ldflags="-s -w"
+    GOOS=$OS GOARCH=$ARCH go build -ldflags="-s -w -X main.version="$VERSION
 
     # compress binary
     tar -czvf $FILENAME cl

@@ -11,6 +11,8 @@ import (
 	"github.com/fatih/color"
 )
 
+var version string
+
 func main() {
 	flag.CommandLine.Usage = usage
 
@@ -28,9 +30,19 @@ func main() {
 	flag.StringVar(&f["magenta"].Pattern, "cm", "", "color magenta")
 	flag.StringVar(&f["red"].Pattern, "cr", "", "color red")
 	flag.StringVar(&f["yellow"].Pattern, "cy", "", "color yellow")
+
 	var filter string
-	flag.StringVar(&filter, "f", "", "apply color filter")
+	flag.StringVar(&filter, "f", "", "apply color filter from provided file")
+
+	var printVersion bool
+	flag.BoolVar(&printVersion, "v", false, "print version")
+
 	flag.Parse()
+
+	if printVersion {
+		fmt.Println(version)
+		return
+	}
 
 	if len(os.Args) == 1 {
 		mainError(fmt.Errorf("no flags provided"))
@@ -79,13 +91,13 @@ func usage() {
 	header := `%s -x regex INPUT
 
 Read INPUT and color the part of the line that matches regex with the
-color specified by -x flag(see Colors).
+color specified by -x flag.
 
 Examples:
 1) color the lines from file "file.txt" that end with "foo" with color blue:
     %s -b ".*foo$" file.txt
 
-Colors:
+Flags:
 `
 	fmt.Fprintf(flag.CommandLine.Output(),
 		header, os.Args[0], os.Args[0])
