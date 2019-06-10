@@ -23,7 +23,7 @@ create_asset() {
     mkdir -p $ASSETDIR
 
     # build stripped binary
-    GOOS=$OS GOARCH=$ARCH go build -ldflags="-s -w -X main.version="$VERSION
+    GOOS=$OS GOARCH=$ARCH go build -ldflags="-s -w -X main.version="$ASSETNAME
 
     # compress binary
     tar -czvf $FILENAME cl
