@@ -25,8 +25,14 @@ create_asset() {
     # build stripped binary
     GOOS=$OS GOARCH=$ARCH go build -ldflags="-s -w -X main.version="$ASSETNAME
 
+    if [[ $OS == "windows" ]]
+    then
+        BINARY_NAME=cl.exe
+    else
+        BINARY_NAME=cl
+    fi
     # compress binary
-    tar -czvf $FILENAME cl
+    tar -czvf $FILENAME $BINARY_NAME
 
     # calculate hash of binary
     sha512sum $FILENAME > $FILENAME.sha512
