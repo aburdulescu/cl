@@ -9,7 +9,7 @@ coloring the part of the input that matches the given pattern with the given col
 ```
 curl -L -O https://github.com/aburdulescu/cl/releases/download/v0.1/cl_v0.1_linux-amd64.tar.gz
 ```
-#### Optionally, verify the authenticity of the tarball
+#### Optionally(but RECOMMENDED), verify the authenticity of the tarball
 - downloaded SHA512 hash corresponding to the downloaded tarball
 ```
 curl -L -O https://github.com/aburdulescu/cl/releases/download/v0.1/cl_v0.1_linux-amd64.tar.gz.sha512
