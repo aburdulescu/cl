@@ -23,6 +23,7 @@ create_asset() {
     mkdir -p $ASSETDIR
 
     # build stripped binary
+    go clean
     GOOS=$OS GOARCH=$ARCH go build -ldflags="-s -w -X main.version="$ASSETNAME
 
     if [[ $OS == "windows" ]]
