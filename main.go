@@ -11,7 +11,7 @@ import (
 	"github.com/fatih/color"
 )
 
-var version string
+const version = "0.1"
 
 func main() {
 	flag.CommandLine.Usage = usage
