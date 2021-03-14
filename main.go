@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"sort"
 	"strings"
 	"text/tabwriter"
 )
@@ -78,10 +79,7 @@ func run() error {
 
 	w := bufio.NewWriter(os.Stdout)
 	for scanner.Scan() {
-		line, err := colorLine(colors, scanner.Text())
-		if err != nil {
-			return err
-		}
+		line := colorLine(colors, scanner.Text())
 		if _, err := w.WriteString(line + "\n"); err != nil {
 			return err
 		}
@@ -100,24 +98,47 @@ type Color struct {
 }
 
 type Position struct {
-	position []int
+	position int
 	color    string
 }
 
-func colorLine(colors []Color, line string) (string, error) {
+type Positions []Position
 
+func (p Positions) Len() int           { return len(p) }
+func (p Positions) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+func (p Positions) Less(i, j int) bool { return p[i].position < p[j].position }
+
+func colorLine(colors []Color, line string) string {
 	var positions []Position
+	var extraLen int
+
 	for _, c := range colors {
 		p := c.re.FindAllIndex([]byte(line), -1)
 		for i := range p {
-			positions = append(positions, Position{p[i], c.color})
+			positions = append(positions, Position{p[i][0], c.color})
+			extraLen += len(c.color)
+			positions = append(positions, Position{p[i][1], Reset})
+			extraLen += len(Reset)
 		}
 	}
 
-	var output strings.Builder
-	output.Grow(len(line))
+	if positions == nil {
+		return line
+	}
 
-	return line, nil
+	sort.Sort(Positions(positions))
+
+	var output strings.Builder
+	output.Grow(len(line) + extraLen)
+
+	var last int
+	for i := range positions {
+		output.WriteString(line[last:positions[i].position])
+		last = positions[i].position
+		output.WriteString(positions[i].color)
+	}
+
+	return output.String()
 }
 
 func CustomUsage() {
