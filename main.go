@@ -1,111 +1,93 @@
 package main
 
 import (
-	"bufio"
 	"flag"
 	"fmt"
 	"os"
-
-	"github.com/aburdulescu/cl/pkg/cl"
-	"github.com/aburdulescu/cl/pkg/flags"
-	"github.com/fatih/color"
+	"text/tabwriter"
 )
 
-const version = "0.1"
-
 func main() {
-	flag.CommandLine.Usage = usage
-
-	f := flags.Flags{
-		"blue":    {ColorAttr: color.FgBlue},
-		"cyan":    {ColorAttr: color.FgCyan},
-		"green":   {ColorAttr: color.FgGreen},
-		"magenta": {ColorAttr: color.FgMagenta},
-		"red":     {ColorAttr: color.FgRed},
-		"yellow":  {ColorAttr: color.FgYellow},
+	if err := run(); err != nil {
+		fmt.Fprintln(os.Stderr, "error:", err)
+		os.Exit(1)
 	}
-	flag.StringVar(&f["blue"].Pattern, "cb", "", "color blue")
-	flag.StringVar(&f["cyan"].Pattern, "cc", "", "color cyan")
-	flag.StringVar(&f["green"].Pattern, "cg", "", "color green")
-	flag.StringVar(&f["magenta"].Pattern, "cm", "", "color magenta")
-	flag.StringVar(&f["red"].Pattern, "cr", "", "color red")
-	flag.StringVar(&f["yellow"].Pattern, "cy", "", "color yellow")
+}
 
-	var filter string
-	flag.StringVar(&filter, "f", "", "apply color filter from provided file")
+func run() error {
+	flag.Usage = CustomUsage
+
+	for i := range flags {
+		flag.StringVar(&flags[i].Pattern, flags[i].Name, "", flags[i].Usage)
+	}
 
 	var printVersion bool
 	flag.BoolVar(&printVersion, "v", false, "print version")
+
+	var printColorPalette bool
+	flag.BoolVar(&printColorPalette, "print-palette", false, "print available color palette")
 
 	flag.Parse()
 
 	if printVersion {
 		fmt.Println(version)
-		return
+		return nil
+	}
+
+	if printColorPalette {
+		w := tabwriter.NewWriter(os.Stdout, 0, 4, 2, ' ', 0)
+		for _, f := range flags {
+			fmt.Fprintf(w, "%s\t%scolored text%s\n", f.Name, f.Color, Reset)
+		}
+		w.Flush()
+		return nil
 	}
 
 	if len(os.Args) == 1 {
-		mainError(fmt.Errorf("no flags provided"))
+		return fmt.Errorf("no flags provided")
 	}
 
-	if filter != "" {
-		err := flags.FromFilter(filter, f)
-		if err != nil {
-			mainError(err)
+	for _, f := range flags {
+		if f.Pattern != "" {
+			fmt.Printf("%scolored text%s\n", f.Color, Reset)
 		}
 	}
 
-	colors, err := cl.CreateColors(f)
-	if err != nil {
-		mainError(err)
-	}
+	return nil
+}
 
-	var scanner *bufio.Scanner
-	if len(flag.Args()) == 0 {
-		scanner = bufio.NewScanner(bufio.NewReader(os.Stdin))
-	} else {
-		file, err := os.Open(flag.Arg(0))
-		if err != nil {
-			mainError(err)
+func CustomUsage() {
+	w := tabwriter.NewWriter(os.Stderr, 0, 4, 2, ' ', 0)
+
+	fmt.Fprintf(w, "Usage: %s [OPTION]|[--COLOR=PATTERN]... [FILE]\n", os.Args[0])
+
+	validOptions := map[string]bool{"v": true, "print-palette": true}
+
+	options := []*flag.Flag{}
+	colorFlags := []*flag.Flag{}
+	flag.VisitAll(func(f *flag.Flag) {
+		if _, ok := validOptions[f.Name]; ok {
+			options = append(options, f)
+		} else {
+			colorFlags = append(colorFlags, f)
 		}
-		defer file.Close()
-		scanner = bufio.NewScanner(bufio.NewReader(file))
-	}
+	})
 
-	color.NoColor = false // always output color
-
-	w := bufio.NewWriter(os.Stdout)
-	for scanner.Scan() {
-		_, err := w.WriteString(cl.ColorLine(colors, scanner.Text()) + "\n")
-		if err != nil {
-			mainError(err)
+	fmt.Fprintf(w, "\nOPTIONS:\n")
+	for _, f := range options {
+		var flagPrefix string
+		if len(f.Name) > 1 {
+			flagPrefix = "--"
+		} else {
+			flagPrefix = "-"
 		}
+		fmt.Fprintf(w, "\t%s%s\t%s\n", flagPrefix, f.Name, f.Usage)
 	}
+
+	fmt.Fprintf(w, "\nCOLOR FLAGS:\n")
+	for _, f := range colorFlags {
+		fmt.Fprintf(w, "\t--%s=regex\t%s\n", f.Name, f.Usage)
+	}
+
 	w.Flush()
-	if err := scanner.Err(); err != nil {
-		mainError(err)
-	}
-}
-
-func usage() {
-	header := `%s -x regex INPUT
-
-Read INPUT and color the part of the line that matches regex with the
-color specified by -x flag.
-
-Examples:
-1) color the lines from file "file.txt" that end with "foo" with color blue:
-    %s -b ".*foo$" file.txt
-
-Flags:
-`
-	fmt.Fprintf(flag.CommandLine.Output(),
-		header, os.Args[0], os.Args[0])
-	flag.PrintDefaults()
-
-}
-
-func mainError(err error) {
-	fmt.Fprintln(os.Stderr, "error:", err)
-	os.Exit(1)
 }
