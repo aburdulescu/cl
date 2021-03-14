@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strings"
 	"text/tabwriter"
 )
 
@@ -49,10 +50,8 @@ func run() error {
 		return fmt.Errorf("no flags provided")
 	}
 
-	type Color struct {
-		re    *regexp.Regexp
-		color string
-	}
+	// TODO: detect duplicate patterns: --red xyz --green xyz
+
 	colors := []Color{}
 	for _, f := range flags {
 		if f.Pattern == "" {
@@ -79,10 +78,11 @@ func run() error {
 
 	w := bufio.NewWriter(os.Stdout)
 	for scanner.Scan() {
-		// call re.FindAllIndex
-		// add colors where indexes indicate
-		_, err := w.WriteString(scanner.Text() + "\n")
+		line, err := colorLine(colors, scanner.Text())
 		if err != nil {
+			return err
+		}
+		if _, err := w.WriteString(line + "\n"); err != nil {
 			return err
 		}
 	}
@@ -92,6 +92,32 @@ func run() error {
 	}
 
 	return nil
+}
+
+type Color struct {
+	re    *regexp.Regexp
+	color string
+}
+
+type Position struct {
+	position []int
+	color    string
+}
+
+func colorLine(colors []Color, line string) (string, error) {
+
+	var positions []Position
+	for _, c := range colors {
+		p := c.re.FindAllIndex([]byte(line), -1)
+		for i := range p {
+			positions = append(positions, Position{p[i], c.color})
+		}
+	}
+
+	var output strings.Builder
+	output.Grow(len(line))
+
+	return line, nil
 }
 
 func CustomUsage() {
@@ -124,7 +150,7 @@ func CustomUsage() {
 
 	fmt.Fprintf(w, "\nCOLOR FLAGS:\n")
 	for _, f := range colorFlags {
-		fmt.Fprintf(w, "\t--%s=regex\t%s\n", f.Name, f.Usage)
+		fmt.Fprintf(w, "\t--%s\t%s\n", f.Name, f.Usage)
 	}
 
 	w.Flush()
