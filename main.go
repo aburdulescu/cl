@@ -138,6 +138,10 @@ func colorLine(colors []Color, line string) string {
 		output.WriteString(positions[i].color)
 	}
 
+	if last < len(line) {
+		output.WriteString(line[last:])
+	}
+
 	return output.String()
 }
 
