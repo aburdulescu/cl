@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"os"
+	"regexp"
 	"text/tabwriter"
 )
 
@@ -47,10 +49,46 @@ func run() error {
 		return fmt.Errorf("no flags provided")
 	}
 
+	type Color struct {
+		re    *regexp.Regexp
+		color string
+	}
+	colors := []Color{}
 	for _, f := range flags {
-		if f.Pattern != "" {
-			fmt.Printf("%scolored text%s\n", f.Color, Reset)
+		if f.Pattern == "" {
+			continue
 		}
+		re, err := regexp.Compile(f.Pattern)
+		if err != nil {
+			return err
+		}
+		colors = append(colors, Color{re, f.Color})
+	}
+
+	var scanner *bufio.Scanner
+	if len(flag.Args()) == 0 {
+		scanner = bufio.NewScanner(bufio.NewReader(os.Stdin))
+	} else {
+		file, err := os.Open(flag.Arg(0))
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+		scanner = bufio.NewScanner(bufio.NewReader(file))
+	}
+
+	w := bufio.NewWriter(os.Stdout)
+	for scanner.Scan() {
+		// call re.FindAllIndex
+		// add colors where indexes indicate
+		_, err := w.WriteString(scanner.Text() + "\n")
+		if err != nil {
+			return err
+		}
+	}
+	w.Flush()
+	if err := scanner.Err(); err != nil {
+		return err
 	}
 
 	return nil
