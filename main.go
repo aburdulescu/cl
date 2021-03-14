@@ -31,6 +31,9 @@ func run() error {
 	var printColorPalette bool
 	flag.BoolVar(&printColorPalette, "print-palette", false, "print available color palette")
 
+	var exportFilter bool
+	flag.BoolVar(&exportFilter, "export-filter", false, "export filter specified by provided flags")
+
 	flag.Parse()
 
 	if printVersion {
@@ -44,6 +47,21 @@ func run() error {
 			fmt.Fprintf(w, "%s\t%scolored text%s\n", f.Name, f.Color, Reset)
 		}
 		w.Flush()
+		return nil
+	}
+
+	if exportFilter {
+		f, err := os.Create("filter.cl")
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+		for i := range flags {
+			if flags[i].Pattern == "" {
+				continue
+			}
+			f.WriteString(flags[i].Name + "=" + flags[i].Pattern + "\n")
+		}
 		return nil
 	}
 
@@ -150,7 +168,11 @@ func CustomUsage() {
 
 	fmt.Fprintf(w, "Usage: %s [OPTION]|[--COLOR=PATTERN]... [FILE]\n", os.Args[0])
 
-	validOptions := map[string]bool{"v": true, "print-palette": true}
+	validOptions := map[string]bool{
+		"v":             true,
+		"print-palette": true,
+		"export-filter": true,
+	}
 
 	options := []*flag.Flag{}
 	colorFlags := []*flag.Flag{}
