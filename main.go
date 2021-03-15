@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"regexp"
 	"sort"
@@ -34,7 +35,16 @@ func run() error {
 	var exportFilter bool
 	flag.BoolVar(&exportFilter, "export-filter", false, "export filter specified by provided flags")
 
+	var filterFile string
+	flag.StringVar(&filterFile, "filter", "", "import flags from specified file")
+
 	flag.Parse()
+
+	if filterFile != "" {
+		if err := parseFilterFile(filterFile); err != nil {
+			return err
+		}
+	}
 
 	if printVersion {
 		fmt.Println(version)
@@ -161,4 +171,13 @@ func colorLine(colors []Color, line string) string {
 	}
 
 	return output.String()
+}
+
+func parseFilterFile(path string) error {
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		return err
+	}
+	fmt.Println(string(data))
+	return nil
 }

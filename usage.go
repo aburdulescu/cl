@@ -16,6 +16,7 @@ func customUsage() {
 		"v":             true,
 		"print-palette": true,
 		"export-filter": true,
+		"filter":        true,
 	}
 
 	options := []*flag.Flag{}
