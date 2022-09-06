@@ -4,7 +4,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/aburdulescu/cl/pkg/flags"
+	"bandr.me/p/cl/pkg/flags"
 	"github.com/fatih/color"
 )
 

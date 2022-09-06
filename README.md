@@ -7,5 +7,5 @@ coloring the part of the input that matches the given pattern with the given col
 - install golang
 - then run
 ```
-go get github.com/aburdulescu/cl
+go install bandr.me/p/cl@latest
 ```

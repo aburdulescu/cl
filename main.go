@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/aburdulescu/cl/pkg/cl"
-	"github.com/aburdulescu/cl/pkg/flags"
+	"bandr.me/p/cl/pkg/cl"
+	"bandr.me/p/cl/pkg/flags"
 	"github.com/fatih/color"
 )
 
